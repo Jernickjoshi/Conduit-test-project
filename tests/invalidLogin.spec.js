@@ -1,4 +1,7 @@
 const { test, expect } = require('@playwright/test');
+const { SignupPage } = require('../pages/SignupPage');
+const { LoginPage } = require('../pages/LoginPage');
+const { SettingsPage } = require('../pages/SettingsPage');
 
 test('login fails with a wrong password', async ({ page }) => {
   const unique = Date.now();
@@ -6,27 +9,23 @@ test('login fails with a wrong password', async ({ page }) => {
   const email = `user${unique}@example.com`;
   const password = 'Correct@1234';
 
-  await page.goto('https://demo.realworld.show');
-  await page.getByRole('link', { name: 'Sign up' }).click();
-  await page.getByRole('textbox', { name: 'Username' }).fill(username);
-  await page.getByRole('textbox', { name: 'Email' }).fill(email);
-  await page.getByRole('textbox', { name: 'Password' }).fill(password);
-  await page.getByRole('button', { name: 'Sign up' }).click();
+  const signupPage = new SignupPage(page);
+  const settingsPage = new SettingsPage(page);
+  const loginPage = new LoginPage(page);
+
+  await signupPage.open();
+  await signupPage.signUp(username, email, password);
   await expect(page.getByText(username)).toBeVisible();
 
-  await page.getByRole('link', { name: /Settings/ }).click();
-  await page.getByRole('button', { name: 'Or click here to logout.' }).click();
-
-  await page.getByRole('link', { name: 'Sign in' }).click();
-  await page.getByRole('textbox', { name: 'Email' }).fill(email);
-  await page.getByRole('textbox', { name: 'Password' }).fill('Wrong@9999');
+  await settingsPage.logout();
+  await loginPage.open();
 
   const responsePromise = page.waitForResponse(
     r => r.url().includes('/api/users/login') && r.request().method() === 'POST'
   );
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await loginPage.logIn(email, 'Wrong@9999');
   const response = await responsePromise;
 
   expect(response.status()).toBe(401);
-  await expect(page.getByText(/credentials invalid/i)).toBeVisible();
+  await expect(page.getByText(/credentials invalid/i)).toBeVisible();   // match the real text
 });
