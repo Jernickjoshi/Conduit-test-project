@@ -12,5 +12,5 @@ test('user can publish a new article', async ({ loggedInUser, articlePage, page 
   const response = await responsePromise;
   
   expect(response.status()).toBe(201);
-  await expect(page.getByRole('heading', { name: 'Something else entirely' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: title })).toBeVisible();
 });
