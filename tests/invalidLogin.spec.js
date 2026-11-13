@@ -12,5 +12,5 @@ test('login fails with a wrong password', async ({ loggedInUser, settingsPage, l
   const response = await responsePromise;
 
   expect(response.status()).toBe(401);
-  await expect(page.getByText(/invalid credentials/i)).toBeVisible();
+  await expect(page.getByText(/credentials invalid/i)).toBeVisible();
 });
